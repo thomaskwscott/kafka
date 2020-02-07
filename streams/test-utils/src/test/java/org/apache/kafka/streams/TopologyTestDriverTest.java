@@ -33,6 +33,7 @@ import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.streams.errors.TopologyException;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.processor.AbstractProcessor;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.ProcessorSupplier;
@@ -91,7 +92,7 @@ public class TopologyTestDriverTest {
     private final static String SINK_TOPIC_1 = "sink-topic-1";
     private final static String SINK_TOPIC_2 = "sink-topic-2";
 
-    private final Headers headers = new RecordHeaders(new Header[] {new RecordHeader("key", "value".getBytes())});
+    private final Headers headers = new RecordHeaders(new Header[]{new RecordHeader("key", "value".getBytes())});
 
     private final byte[] key1 = new byte[0];
     private final byte[] value1 = new byte[0];
@@ -611,20 +612,20 @@ public class TopologyTestDriverTest {
         final TestRecord<Integer, Double> consumerRecord2 = new TestRecord<>(source2Key, source2Value);
 
         testDriver.pipeRecord(SOURCE_TOPIC_1,
-                              consumerRecord1,
-                              Serdes.Long().serializer(),
-                              Serdes.String().serializer(),
-                              Instant.now());
+                consumerRecord1,
+                Serdes.Long().serializer(),
+                Serdes.String().serializer(),
+                Instant.now());
         final TestRecord<Long, String> result1 =
             testDriver.readRecord(SINK_TOPIC_1, Serdes.Long().deserializer(), Serdes.String().deserializer());
         assertThat(result1.getKey(), equalTo(source1Key));
         assertThat(result1.getValue(), equalTo(source1Value));
 
         testDriver.pipeRecord(SOURCE_TOPIC_2,
-                              consumerRecord2,
-                              Serdes.Integer().serializer(),
-                              Serdes.Double().serializer(),
-                              Instant.now());
+                consumerRecord2,
+                Serdes.Integer().serializer(),
+                Serdes.Double().serializer(),
+                Instant.now());
         final TestRecord<Integer, Double> result2 =
             testDriver.readRecord(SINK_TOPIC_1, Serdes.Integer().deserializer(), Serdes.Double().deserializer());
         assertThat(result2.getKey(), equalTo(source2Key));
@@ -654,22 +655,22 @@ public class TopologyTestDriverTest {
         final TestRecord<Integer, Double> consumerRecord2 = new TestRecord<>(source2Key, source2Value);
 
         testDriver.pipeRecord(SOURCE_TOPIC_1,
-                              consumerRecord1,
-                              Serdes.Long().serializer(),
-                              Serdes.String().serializer(),
-                              Instant.now());
+                consumerRecord1,
+                Serdes.Long().serializer(),
+                Serdes.String().serializer(),
+                Instant.now());
         final TestRecord<Long, String> result1 =
-            testDriver.readRecord(SINK_TOPIC_1, Serdes.Long().deserializer(), Serdes.String().deserializer());
+                testDriver.readRecord(SINK_TOPIC_1, Serdes.Long().deserializer(), Serdes.String().deserializer());
         assertThat(result1.getKey(), equalTo(source1Key));
         assertThat(result1.getValue(), equalTo(source1Value));
 
         testDriver.pipeRecord(SOURCE_TOPIC_2,
-                              consumerRecord2,
-                              Serdes.Integer().serializer(),
-                              Serdes.Double().serializer(),
-                              Instant.now());
+                consumerRecord2,
+                Serdes.Integer().serializer(),
+                Serdes.Double().serializer(),
+                Instant.now());
         final TestRecord<Integer, Double> result2 =
-            testDriver.readRecord(SINK_TOPIC_2, Serdes.Integer().deserializer(), Serdes.Double().deserializer());
+                testDriver.readRecord(SINK_TOPIC_2, Serdes.Integer().deserializer(), Serdes.Double().deserializer());
         assertThat(result2.getKey(), equalTo(source2Key));
         assertThat(result2.getValue(), equalTo(source2Value));
     }
@@ -1000,7 +1001,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + keyValueStoreName
-                            + " is a key-value store and should be accessed via `getKeyValueStore()`"));
+                    + " is a key-value store and should be accessed via `getKeyValueStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1009,7 +1010,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + timestampedKeyValueStoreName
-                            + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`"));
+                    + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1018,7 +1019,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + windowStoreName
-                            + " is a window store and should be accessed via `getWindowStore()`"));
+                    + " is a window store and should be accessed via `getWindowStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1027,7 +1028,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + timestampedWindowStoreName
-                            + " is a timestamped window store and should be accessed via `getTimestampedWindowStore()`"));
+                    + " is a timestamped window store and should be accessed via `getTimestampedWindowStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1036,7 +1037,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + sessionStoreName
-                            + " is a session store and should be accessed via `getSessionStore()`"));
+                    + " is a session store and should be accessed via `getSessionStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1045,7 +1046,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + globalKeyValueStoreName
-                            + " is a key-value store and should be accessed via `getKeyValueStore()`"));
+                    + " is a key-value store and should be accessed via `getKeyValueStore()`"));
         }
         {
             final IllegalArgumentException e = assertThrows(
@@ -1054,7 +1055,7 @@ public class TopologyTestDriverTest {
             assertThat(
                 e.getMessage(),
                 equalTo("Store " + globalTimestampedKeyValueStoreName
-                            + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`"));
+                    + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`"));
         }
     }
 
@@ -1193,10 +1194,10 @@ public class TopologyTestDriverTest {
         topology.addSource("sourceProcessor", "input-topic");
         topology.addProcessor("aggregator", new CustomMaxAggregatorSupplier(), "sourceProcessor");
         topology.addStateStore(Stores.keyValueStoreBuilder(
-            storeSupplier,
-            Serdes.String(),
-            Serdes.Long()),
-                               "aggregator");
+                storeSupplier,
+                Serdes.String(),
+                Serdes.Long()),
+                "aggregator");
         topology.addSink("sinkProcessor", "result-topic", "aggregator");
 
         config.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -1209,7 +1210,7 @@ public class TopologyTestDriverTest {
 
     private void pipeInput(final String topic, final String key, final Long value, final Long time) {
         testDriver.pipeRecord(topic, new TestRecord<>(key, value, null, time),
-                              new StringSerializer(), new LongSerializer(), null);
+                new StringSerializer(), new LongSerializer(), null);
     }
 
     private void compareKeyValue(final TestRecord<String, Long> record, final String key, final Long value) {
@@ -1325,7 +1326,7 @@ public class TopologyTestDriverTest {
             Stores.inMemoryKeyValueStore("aggStore"),
             Serdes.String(),
             Serdes.Long()).withCachingEnabled(), // intentionally turn on caching to achieve better test coverage
-                               "aggregator");
+            "aggregator");
 
         testDriver = new TopologyTestDriver(topology, config);
 
@@ -1365,7 +1366,7 @@ public class TopologyTestDriverTest {
         );
         topology.addStateStore(Stores.keyValueStoreBuilder(
             Stores.persistentKeyValueStore("storeProcessorStore"), Serdes.String(), Serdes.Long()),
-                               "storeProcessor");
+            "storeProcessor");
 
         final Properties config = new Properties();
         config.put(StreamsConfig.APPLICATION_ID_CONFIG, "test-TopologyTestDriver-cleanup");
@@ -1377,7 +1378,7 @@ public class TopologyTestDriverTest {
         try (final TopologyTestDriver testDriver = new TopologyTestDriver(topology, config)) {
             assertNull(testDriver.getKeyValueStore("storeProcessorStore").get("a"));
             testDriver.pipeRecord("input-topic", new TestRecord<>("a", 1L),
-                                  new StringSerializer(), new LongSerializer(), Instant.now());
+                    new StringSerializer(), new LongSerializer(), Instant.now());
             Assert.assertEquals(1L, testDriver.getKeyValueStore("storeProcessorStore").get("a"));
         }
 
@@ -1395,8 +1396,8 @@ public class TopologyTestDriverTest {
     public void shouldFeedStoreFromGlobalKTable() {
         final StreamsBuilder builder = new StreamsBuilder();
         builder.globalTable("topic",
-                            Consumed.with(Serdes.String(), Serdes.String()),
-                            Materialized.as("globalStore"));
+            Consumed.with(Serdes.String(), Serdes.String()),
+            Materialized.as("globalStore"));
         try (final TopologyTestDriver testDriver = new TopologyTestDriver(builder.build(), config)) {
             final KeyValueStore<String, String> globalStore = testDriver.getKeyValueStore("globalStore");
             Assert.assertNotNull(globalStore);
@@ -1431,9 +1432,9 @@ public class TopologyTestDriverTest {
     @Test
     public void shouldProcessFromSourcesThatMatchMultiplePattern() {
 
-        final Pattern pattern2Source1 = Pattern.compile("source-topic-\\d");
-        final Pattern pattern2Source2 = Pattern.compile("source-topic-[A-Z]");
-        final String consumerTopic2 = "source-topic-Z";
+        final  Pattern pattern2Source1 = Pattern.compile("source-topic-\\d");
+        final  Pattern pattern2Source2 = Pattern.compile("source-topic-[A-Z]");
+        final  String consumerTopic2 = "source-topic-Z";
 
         final TestRecord<byte[], byte[]> consumerRecord2 = new TestRecord<>(key2, value2, null, timestamp2);
 
@@ -1495,11 +1496,11 @@ public class TopologyTestDriverTest {
             pipeRecord(SOURCE_TOPIC_1, testRecord1);
         } catch (final TopologyException exception) {
             final String str =
-                String.format(
-                    "Invalid topology: Topology add source of type String for topic: %s cannot contain regex pattern for " +
-                        "input record topic: %s and hence cannot process the message.",
-                    pattern2Source1,
-                    SOURCE_TOPIC_1);
+                    String.format(
+                            "Invalid topology: Topology add source of type String for topic: %s cannot contain regex pattern for " +
+                                    "input record topic: %s and hence cannot process the message.",
+                            pattern2Source1,
+                            SOURCE_TOPIC_1);
             assertEquals(str, exception.getMessage());
         }
     }
@@ -1534,30 +1535,13 @@ public class TopologyTestDriverTest {
         final Topology topology = new Topology();
         topology.addSource("source", new StringDeserializer(), new StringDeserializer(), "input");
         topology.addProcessor("recursiveProcessor",
-                              new ProcessorSupplier<String, String>() {
+                              () -> new AbstractProcessor<String, String>() {
                                   @Override
-                                  public Processor<String, String> get() {
-                                      return new Processor<String, String>() {
-                                          private ProcessorContext context;
-
-                                          @Override
-                                          public void init(final ProcessorContext context) {
-                                              this.context = context;
-                                          }
-
-                                          @Override
-                                          public void process(final String key, final String value) {
-                                              if (!value.startsWith("recurse-")) {
-                                                  context.forward(key, "recurse-" + value, To.child("recursiveSink"));
-                                              }
-                                              context.forward(key, value, To.child("sink"));
-                                          }
-
-                                          @Override
-                                          public void close() {
-
-                                          }
-                                      };
+                                  public void process(final String key, final String value) {
+                                      if (!value.startsWith("recurse-")) {
+                                          context().forward(key, "recurse-" + value, To.child("recursiveSink"));
+                                      }
+                                      context().forward(key, value, To.child("sink"));
                                   }
                               },
                               "source");

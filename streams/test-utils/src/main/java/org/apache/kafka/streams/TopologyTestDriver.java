@@ -464,7 +464,6 @@ public class TopologyTestDriver implements Closeable {
         if (!internalTopologyBuilder.sourceTopicNames().isEmpty()) {
             validateSourceTopicNameRegexPattern(topicName);
         }
-
         final TopicPartition topicPartition = getTopicPartition(topicName);
 
         if (topicPartition == null) {
@@ -472,20 +471,6 @@ public class TopologyTestDriver implements Closeable {
         } else {
             enqueueTaskRecord(topicName, topicPartition, timestamp, key, value, headers);
             processAllProcessableRecords();
-        }
-    }
-
-    private void processAllProcessableRecords() {
-        // If the topology only has global tasks, then `task` would be null.
-        // For this method, it just means there's nothing to do.
-        if (task != null) {
-            while (task.hasRecordsQueued()) {
-                // Process the record ...
-                task.process(mockWallClockTime.milliseconds());
-                task.maybePunctuateStreamTime();
-                task.commit();
-                captureOutputRecords();
-            }
         }
     }
 
@@ -515,6 +500,20 @@ public class TopologyTestDriver implements Closeable {
             headers)));
     }
 
+    private void processAllProcessableRecords() {
+        // If the topology only has global tasks, then `task` would be null.
+        // For this method, it just means there's nothing to do.
+        if (task != null) {
+            while (task.hasRecordsQueued()) {
+                // Process the record ...
+                task.process(mockWallClockTime.milliseconds());
+                task.maybePunctuateStreamTime();
+                task.commit();
+                captureOutputRecords();
+            }
+        }
+    }
+
     private void processGlobalRecord(final String topicName, final Long timestamp, final byte[] key, final byte[] value, final Headers headers) {
         final TopicPartition globalTopicPartition = globalPartitionsByTopic.get(topicName);
         if (globalTopicPartition == null) {
@@ -541,8 +540,8 @@ public class TopologyTestDriver implements Closeable {
         for (final String sourceTopicName : internalTopologyBuilder.sourceTopicNames()) {
             if (!sourceTopicName.equals(inputRecordTopic) && Pattern.compile(sourceTopicName).matcher(inputRecordTopic).matches()) {
                 throw new TopologyException("Topology add source of type String for topic: " + sourceTopicName +
-                                                " cannot contain regex pattern for input record topic: " + inputRecordTopic +
-                                                " and hence cannot process the message.");
+                        " cannot contain regex pattern for input record topic: " + inputRecordTopic +
+                        " and hence cannot process the message.");
             }
         }
     }
@@ -875,23 +874,23 @@ public class TopologyTestDriver implements Closeable {
     private void throwIfBuiltInStore(final StateStore stateStore) {
         if (stateStore instanceof TimestampedKeyValueStore) {
             throw new IllegalArgumentException("Store " + stateStore.name()
-                                                   + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`");
+                + " is a timestamped key-value store and should be accessed via `getTimestampedKeyValueStore()`");
         }
         if (stateStore instanceof ReadOnlyKeyValueStore) {
             throw new IllegalArgumentException("Store " + stateStore.name()
-                                                   + " is a key-value store and should be accessed via `getKeyValueStore()`");
+                + " is a key-value store and should be accessed via `getKeyValueStore()`");
         }
         if (stateStore instanceof TimestampedWindowStore) {
             throw new IllegalArgumentException("Store " + stateStore.name()
-                                                   + " is a timestamped window store and should be accessed via `getTimestampedWindowStore()`");
+                + " is a timestamped window store and should be accessed via `getTimestampedWindowStore()`");
         }
         if (stateStore instanceof ReadOnlyWindowStore) {
             throw new IllegalArgumentException("Store " + stateStore.name()
-                                                   + " is a window store and should be accessed via `getWindowStore()`");
+                + " is a window store and should be accessed via `getWindowStore()`");
         }
         if (stateStore instanceof ReadOnlySessionStore) {
             throw new IllegalArgumentException("Store " + stateStore.name()
-                                                   + " is a session store and should be accessed via `getSessionStore()`");
+                + " is a session store and should be accessed via `getSessionStore()`");
         }
     }
 
