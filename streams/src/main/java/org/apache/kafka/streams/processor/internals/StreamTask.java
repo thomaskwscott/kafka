@@ -923,4 +923,8 @@ public class StreamTask extends AbstractTask implements ProcessorNodePunctuator,
     long streamTime() {
         return partitionGroup.streamTime();
     }
+
+    public boolean hasRecordsQueued() {
+        return numBuffered() > 0;
+    }
 }
