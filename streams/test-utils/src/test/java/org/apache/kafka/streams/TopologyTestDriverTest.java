@@ -1534,17 +1534,19 @@ public class TopologyTestDriverTest {
 
         final Topology topology = new Topology();
         topology.addSource("source", new StringDeserializer(), new StringDeserializer(), "input");
-        topology.addProcessor("recursiveProcessor",
-                              () -> new AbstractProcessor<String, String>() {
-                                  @Override
-                                  public void process(final String key, final String value) {
-                                      if (!value.startsWith("recurse-")) {
-                                          context().forward(key, "recurse-" + value, To.child("recursiveSink"));
-                                      }
-                                      context().forward(key, value, To.child("sink"));
-                                  }
-                              },
-                              "source");
+        topology.addProcessor(
+            "recursiveProcessor",
+            () -> new AbstractProcessor<String, String>() {
+                @Override
+                public void process(final String key, final String value) {
+                    if (!value.startsWith("recurse-")) {
+                        context().forward(key, "recurse-" + value, To.child("recursiveSink"));
+                    }
+                    context().forward(key, value, To.child("sink"));
+                }
+            },
+            "source"
+        );
         topology.addSink("recursiveSink", "input", new StringSerializer(), new StringSerializer(), "recursiveProcessor");
         topology.addSink("sink", "output", new StringSerializer(), new StringSerializer(), "recursiveProcessor");
 
