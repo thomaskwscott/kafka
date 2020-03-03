@@ -55,3 +55,4 @@ clients/src/generated
 clients/src/generated-test
 jmh-benchmarks/generated
 streams/src/generated
+kafka_2.12-2.6.0-SNAPSHOT/

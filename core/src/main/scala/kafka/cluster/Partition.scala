@@ -952,7 +952,7 @@ class Partition(val topicPartition: TopicPartition,
     }
   }
 
-  def appendRecordsToLeader(records: MemoryRecords, origin: AppendOrigin, requiredAcks: Int): LogAppendInfo = {
+  def appendRecordsToLeader(records: MemoryRecords, origin: AppendOrigin, requiredAcks: Int, forceOffsets: Boolean = false): LogAppendInfo = {
     val (info, leaderHWIncremented) = inReadLock(leaderIsrUpdateLock) {
       leaderLogIfLocal match {
         case Some(leaderLog) =>
@@ -965,8 +965,13 @@ class Partition(val topicPartition: TopicPartition,
               s"is insufficient to satisfy the min.isr requirement of $minIsr for partition $topicPartition")
           }
 
-          val info = leaderLog.appendAsLeader(records, leaderEpoch = this.leaderEpoch, origin,
-            interBrokerProtocolVersion)
+          val info = if (forceOffsets) {
+            leaderLog.appendAsReplica(records,leaderEpoch = this.leaderEpoch, origin, interBrokerProtocolVersion)
+          } else {
+            leaderLog.appendAsLeader(records, leaderEpoch = this.leaderEpoch, origin,
+              interBrokerProtocolVersion)
+
+          }
 
           // we may need to increment high watermark since ISR could be down to 1
           (info, maybeIncrementLeaderHW(leaderLog))

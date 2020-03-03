@@ -189,6 +189,7 @@ public final class RecordAccumulator {
                                      byte[] key,
                                      byte[] value,
                                      Header[] headers,
+                                     long offset,
                                      Callback callback,
                                      long maxTimeToBlock,
                                      boolean abortOnNewBatch,
@@ -204,7 +205,7 @@ public final class RecordAccumulator {
             synchronized (dq) {
                 if (closed)
                     throw new KafkaException("Producer closed while send in progress");
-                RecordAppendResult appendResult = tryAppend(timestamp, key, value, headers, callback, dq, nowMs);
+                RecordAppendResult appendResult = tryAppend(timestamp, key, value, headers, offset, callback, dq, nowMs);
                 if (appendResult != null)
                     return appendResult;
             }
@@ -227,7 +228,7 @@ public final class RecordAccumulator {
                 if (closed)
                     throw new KafkaException("Producer closed while send in progress");
 
-                RecordAppendResult appendResult = tryAppend(timestamp, key, value, headers, callback, dq, nowMs);
+                RecordAppendResult appendResult = tryAppend(timestamp, key, value, headers, offset, callback, dq, nowMs);
                 if (appendResult != null) {
                     // Somebody else found us a batch, return the one we waited for! Hopefully this doesn't happen often...
                     return appendResult;
@@ -235,7 +236,7 @@ public final class RecordAccumulator {
 
                 MemoryRecordsBuilder recordsBuilder = recordsBuilder(buffer, maxUsableMagic);
                 ProducerBatch batch = new ProducerBatch(tp, recordsBuilder, nowMs);
-                FutureRecordMetadata future = Objects.requireNonNull(batch.tryAppend(timestamp, key, value, headers,
+                FutureRecordMetadata future = Objects.requireNonNull(batch.tryAppend(timestamp, key, value, headers, offset,
                         callback, nowMs));
 
                 dq.addLast(batch);
@@ -268,11 +269,11 @@ public final class RecordAccumulator {
      *  and memory records built) in one of the following cases (whichever comes first): right before send,
      *  if it is expired, or when the producer is closed.
      */
-    private RecordAppendResult tryAppend(long timestamp, byte[] key, byte[] value, Header[] headers,
+    private RecordAppendResult tryAppend(long timestamp, byte[] key, byte[] value, Header[] headers, long offset,
                                          Callback callback, Deque<ProducerBatch> deque, long nowMs) {
         ProducerBatch last = deque.peekLast();
         if (last != null) {
-            FutureRecordMetadata future = last.tryAppend(timestamp, key, value, headers, callback, nowMs);
+            FutureRecordMetadata future = last.tryAppend(timestamp, key, value, headers, offset, callback, nowMs);
             if (future == null)
                 last.closeForRecordAppends();
             else

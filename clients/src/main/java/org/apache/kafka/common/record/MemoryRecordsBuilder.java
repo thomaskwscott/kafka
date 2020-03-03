@@ -504,9 +504,13 @@ public class MemoryRecordsBuilder implements AutoCloseable {
      * @param headers The record headers if there are any
      * @return CRC of the record or null if record-level CRC is not supported for the message format
      */
+    public Long append(long timestamp, ByteBuffer key, ByteBuffer value, Header[] headers,long offset) {
+        return appendWithOffset(offset, timestamp, key, value, headers);
+    }
     public Long append(long timestamp, ByteBuffer key, ByteBuffer value, Header[] headers) {
         return appendWithOffset(nextSequentialOffset(), timestamp, key, value, headers);
     }
+
 
     /**
      * Append a new record at the next sequential offset.
@@ -527,6 +531,10 @@ public class MemoryRecordsBuilder implements AutoCloseable {
      * @param headers The record headers if there are any
      * @return CRC of the record or null if record-level CRC is not supported for the message format
      */
+    public Long append(long timestamp, byte[] key, byte[] value, Header[] headers,long offset) {
+        return append(timestamp, wrapNullable(key), wrapNullable(value), headers,offset);
+    }
+
     public Long append(long timestamp, byte[] key, byte[] value, Header[] headers) {
         return append(timestamp, wrapNullable(key), wrapNullable(value), headers);
     }
@@ -735,6 +743,7 @@ public class MemoryRecordsBuilder implements AutoCloseable {
             long timestampDelta = firstTimestamp == null ? 0 : timestamp - firstTimestamp;
             recordSize = DefaultRecord.sizeInBytes(nextOffsetDelta, timestampDelta, key, value, headers);
         }
+
 
         // Be conservative and not take compression of the new record into consideration.
         return this.writeLimit >= estimatedBytesWritten() + recordSize;

@@ -54,6 +54,7 @@ public class ProducerRecord<K, V> {
     private final K key;
     private final V value;
     private final Long timestamp;
+    private final Long offset;
 
     /**
      * Creates a record with a specified timestamp to be sent to a specified topic and partition
@@ -66,7 +67,7 @@ public class ProducerRecord<K, V> {
      * @param value The record contents
      * @param headers the headers that will be included in the record
      */
-    public ProducerRecord(String topic, Integer partition, Long timestamp, K key, V value, Iterable<Header> headers) {
+    public ProducerRecord(String topic, Integer partition, Long timestamp, K key, V value, Iterable<Header> headers,Long offset) {
         if (topic == null)
             throw new IllegalArgumentException("Topic cannot be null.");
         if (timestamp != null && timestamp < 0)
@@ -81,7 +82,13 @@ public class ProducerRecord<K, V> {
         this.value = value;
         this.timestamp = timestamp;
         this.headers = new RecordHeaders(headers);
+        this.offset=offset;
     }
+
+    public ProducerRecord(String topic, Integer partition, Long timestamp, K key, V value, Iterable<Header> headers) {
+        this(topic,partition,timestamp,key,value,headers,-1L);
+    }
+
 
     /**
      * Creates a record with a specified timestamp to be sent to a specified topic and partition
@@ -177,6 +184,11 @@ public class ProducerRecord<K, V> {
     public Long timestamp() {
         return timestamp;
     }
+
+    /**
+     * @return The offset, where to place this record in the log. -1 means append to next offset
+     */
+    public Long offset() { return  offset; }
 
     /**
      * @return The partition to which the record will be sent (or null if no partition was specified)

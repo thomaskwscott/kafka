@@ -100,11 +100,11 @@ public final class ProducerBatch {
      *
      * @return The RecordSend corresponding to this record or null if there isn't sufficient room.
      */
-    public FutureRecordMetadata tryAppend(long timestamp, byte[] key, byte[] value, Header[] headers, Callback callback, long now) {
+    public FutureRecordMetadata tryAppend(long timestamp, byte[] key, byte[] value, Header[] headers, long offset, Callback callback, long now) {
         if (!recordsBuilder.hasRoomFor(timestamp, key, value, headers)) {
             return null;
         } else {
-            Long checksum = this.recordsBuilder.append(timestamp, key, value, headers);
+            Long checksum = this.recordsBuilder.append(timestamp, key, value, headers, offset);
             this.maxRecordSize = Math.max(this.maxRecordSize, AbstractRecords.estimateSizeInBytesUpperBound(magic(),
                     recordsBuilder.compressionType(), key, value, headers));
             this.lastAppendTime = now;
@@ -125,12 +125,12 @@ public final class ProducerBatch {
      * This method is only used by {@link #split(int)} when splitting a large batch to smaller ones.
      * @return true if the record has been successfully appended, false otherwise.
      */
-    private boolean tryAppendForSplit(long timestamp, ByteBuffer key, ByteBuffer value, Header[] headers, Thunk thunk) {
+    private boolean tryAppendForSplit(long timestamp, ByteBuffer key, ByteBuffer value, Header[] headers, long offset, Thunk thunk) {
         if (!recordsBuilder.hasRoomFor(timestamp, key, value, headers)) {
             return false;
         } else {
             // No need to get the CRC.
-            this.recordsBuilder.append(timestamp, key, value, headers);
+            this.recordsBuilder.append(timestamp, key, value, headers,offset);
             this.maxRecordSize = Math.max(this.maxRecordSize, AbstractRecords.estimateSizeInBytesUpperBound(magic(),
                     recordsBuilder.compressionType(), key, value, headers));
             FutureRecordMetadata future = new FutureRecordMetadata(this.produceFuture, this.recordCount,
@@ -266,10 +266,10 @@ public final class ProducerBatch {
                 batch = createBatchOffAccumulatorForRecord(record, splitBatchSize);
 
             // A newly created batch can always host the first message.
-            if (!batch.tryAppendForSplit(record.timestamp(), record.key(), record.value(), record.headers(), thunk)) {
+            if (!batch.tryAppendForSplit(record.timestamp(), record.key(), record.value(), record.headers(), record.offset(),thunk)) {
                 batches.add(batch);
                 batch = createBatchOffAccumulatorForRecord(record, splitBatchSize);
-                batch.tryAppendForSplit(record.timestamp(), record.key(), record.value(), record.headers(), thunk);
+                batch.tryAppendForSplit(record.timestamp(), record.key(), record.value(), record.headers(), record.offset(),thunk);
             }
         }
 

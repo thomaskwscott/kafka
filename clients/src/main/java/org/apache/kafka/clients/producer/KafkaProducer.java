@@ -916,8 +916,12 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
             if (transactionManager != null && transactionManager.isTransactional()) {
                 transactionManager.failIfNotReadyForSend();
             }
+
+            // accumulate with offset
+            long offset = record.offset();
+
             RecordAccumulator.RecordAppendResult result = accumulator.append(tp, timestamp, serializedKey,
-                    serializedValue, headers, interceptCallback, remainingWaitMs, true, nowMs);
+                    serializedValue, headers, offset, interceptCallback, remainingWaitMs, true, nowMs);
 
             if (result.abortForNewBatch) {
                 int prevPartition = partition;
@@ -931,7 +935,7 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
                 interceptCallback = new InterceptorCallback<>(callback, this.interceptors, tp);
 
                 result = accumulator.append(tp, timestamp, serializedKey,
-                    serializedValue, headers, interceptCallback, remainingWaitMs, false, nowMs);
+                    serializedValue, headers, offset, interceptCallback, remainingWaitMs, false, nowMs);
             }
 
             if (transactionManager != null && transactionManager.isTransactional())
