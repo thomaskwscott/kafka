@@ -25,6 +25,7 @@ public class OffsetSpec {
 
     public static class EarliestSpec extends OffsetSpec { }
     public static class LatestSpec extends OffsetSpec { }
+    public static class MaxTimestampSpec extends OffsetSpec { }
     public static class TimestampSpec extends OffsetSpec {
         private final long timestamp;
 
@@ -49,6 +50,13 @@ public class OffsetSpec {
      */
     public static OffsetSpec earliest() {
         return new EarliestSpec();
+    }
+
+    /**
+     * Used to retrieve the max timestamp offset of a partition
+     */
+    public static OffsetSpec maxTimestamp() {
+        return new MaxTimestampSpec();
     }
 
     /**

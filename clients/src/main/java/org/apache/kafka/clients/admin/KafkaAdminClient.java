@@ -4136,11 +4136,7 @@ public class KafkaAdminClient extends AdminClient {
             OffsetSpec offsetSpec = entry.getValue();
             TopicPartition tp = entry.getKey();
             KafkaFutureImpl<ListOffsetsResultInfo> future = futures.get(tp);
-            long offsetQuery = (offsetSpec instanceof TimestampSpec)
-                    ? ((TimestampSpec) offsetSpec).timestamp()
-                    : (offsetSpec instanceof OffsetSpec.EarliestSpec)
-                        ? ListOffsetsRequest.EARLIEST_TIMESTAMP
-                        : ListOffsetsRequest.LATEST_TIMESTAMP;
+            long offsetQuery = getOffsetFromOffsetSpec(offsetSpec);
             // avoid sending listOffsets request for topics with errors
             if (!mr.errors().containsKey(tp.topic())) {
                 Node node = mr.cluster().leaderFor(tp);
@@ -4228,6 +4224,17 @@ public class KafkaAdminClient extends AdminClient {
             });
         }
         return calls;
+    }
+
+    private long getOffsetFromOffsetSpec(OffsetSpec offsetSpec) {
+        if (offsetSpec instanceof TimestampSpec) {
+            return ((TimestampSpec) offsetSpec).timestamp();
+        } else if (offsetSpec instanceof OffsetSpec.EarliestSpec) {
+            return ListOffsetsRequest.EARLIEST_TIMESTAMP;
+        } else if (offsetSpec instanceof OffsetSpec.MaxTimestampSpec) {
+            return ListOffsetsRequest.MAX_TIMESTAMP;
+        }
+        return ListOffsetsRequest.LATEST_TIMESTAMP;
     }
 
     @Override

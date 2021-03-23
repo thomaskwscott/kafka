@@ -40,6 +40,7 @@ import org.apache.kafka.common.protocol.Errors;
 public class ListOffsetsRequest extends AbstractRequest {
     public static final long EARLIEST_TIMESTAMP = -2L;
     public static final long LATEST_TIMESTAMP = -1L;
+    public static final long MAX_TIMESTAMP = -3L;
 
     public static final int CONSUMER_REPLICA_ID = -1;
     public static final int DEBUGGING_REPLICA_ID = -2;
